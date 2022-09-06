@@ -14,6 +14,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 public class RequestAuthController {
+    private String client_id;
+    private String client_secret;
+    private String access_token;
 
     @GetMapping("/api/spotify-login")
     public RedirectView spotifyRedirectView( RedirectAttributes attributes){
@@ -29,15 +32,21 @@ public class RequestAuthController {
         }
 
 
-        String client_id = spotifyConf.getProperty("client.id");
-        String client_secret = spotifyConf.getProperty("client.secret");
+        client_id = spotifyConf.getProperty("client.id");
+        client_secret = spotifyConf.getProperty("client.secret");
         String redirect_uri = "http://localhost:8080/api/get-user-token";
         String response_type = "code";
 
         attributes.addAttribute("client_id", client_id);
         attributes.addAttribute("redirect_uri", redirect_uri);
         attributes.addAttribute("response_type", response_type);
-        return new RedirectView("https://api.spotify.com/authorize");
+        return new RedirectView("https://accounts.spotify.com/authorize");
+    }
+
+    @GetMapping("/api/get-user-token")
+    public RedirectView getUserToken(RedirectAttributes attributes){
+        
+        return new RedirectView("http://localhost:8080/hello");
     }
 
     @GetMapping("/hello")
