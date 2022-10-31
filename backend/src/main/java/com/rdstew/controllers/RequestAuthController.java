@@ -42,8 +42,7 @@ public class RequestAuthController {
     public RedirectView spotifyRedirectView( RedirectAttributes attributes){
         this.loadConfig();
 
-        client_id = this.config.getProperty("client.id");
-        client_secret = this.config.getProperty("client.secret");
+        this.client_id = this.config.getProperty("client.id");
         String response_type = "code";
 
         String state_id = new StateIdBuilder()
@@ -53,8 +52,8 @@ public class RequestAuthController {
             .buildStateId()
             .toString();
 
-        attributes.addAttribute("client_id", client_id);
-        attributes.addAttribute("redirect_uri", redirect_uri);
+        attributes.addAttribute("client_id", this.client_id);
+        attributes.addAttribute("redirect_uri", this.redirect_uri);
         attributes.addAttribute("response_type", response_type);
         attributes.addAttribute("state", state_id);
         return new RedirectView("https://accounts.spotify.com/authorize");
@@ -112,7 +111,7 @@ public class RequestAuthController {
         body.add("grant_type", grant_type);
         body.add("code", token);
         body.add("redirect_url", redirect_uri);
-
+        System.out.println(body.toString());
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
 
         ResponseEntity<String> response =
