@@ -2,6 +2,7 @@ package com.rdstew.controllers;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -12,7 +13,6 @@ import com.rdstew.Application;
 import com.rdstew.state.StateIdBuilder;
 
 
-import org.apache.catalina.filters.HttpHeaderSecurityFilter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,7 +56,7 @@ public class RequestAuthController {
         attributes.addAttribute("redirect_uri", this.redirect_uri);
         attributes.addAttribute("response_type", response_type);
         attributes.addAttribute("state", state_id);
-        return new RedirectView("https://accounts.spotify.com/authorize");
+        return new RedirectView( Application.spotify_account_url + "/authorize");
     }
 
     @GetMapping("/api/get-spotify-token")
@@ -100,23 +100,30 @@ public class RequestAuthController {
             System.out.println(ex.getMessage());
             throw new InternalServerError();
         }
+
+        this.client_id = this.config.getProperty("client.id");
+        this.client_secret = this.config.getProperty("client.secret");
     }
 
     public int requestAuthToken(String grant_type, String token, String redirect_uri){
         RestTemplate http = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add("Authorization", this.config.getProperty("client.id") + ":" + this.config.getProperty("client.secret"));
+        System.out.println(this.client_id);
+        System.out.println(this.client_secret);
+
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", grant_type);
         body.add("code", token);
-        body.add("redirect_url", redirect_uri);
+        body.add("redirect_uri", this.redirect_uri);
+        body.add("client_id", this.client_id);
+        body.add("client_secret", this.client_secret);
         System.out.println(body.toString());
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
 
         ResponseEntity<String> response =
             http.exchange(
-                Application.spotify_url + "/api/token",
+                Application.spotify_account_url + "/api/token",
                 HttpMethod.POST,
                 entity,
                 String.class

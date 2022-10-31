@@ -18,6 +18,7 @@ public class Application{
     public static String backend_domain = "http://localhost:8080";
     public static String frontend_domain = "http://localhost:4200";
     public static String spotify_url = "https://api.spotify.com/v1";
+    public static String spotify_account_url = "https://accounts.spotify.com";
 
     public static void main(String[] args){
         try{
