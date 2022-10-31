@@ -1,16 +1,29 @@
 package com.rdstew.controllers;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
-import java.util.Random;
+import java.util.logging.Logger;
+
 
 import com.rdstew.exceptions.InternalServerError;
 import com.rdstew.Application;
+import com.rdstew.state.StateIdBuilder;
 
+
+import org.apache.catalina.filters.HttpHeaderSecurityFilter;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -19,25 +32,26 @@ public class RequestAuthController {
     private String client_id;
     private String client_secret;
     private String access_token;
+    private String redirect_uri  = Application.backend_domain + "/api/get-spotify-token";
+    private Properties config;
+
+
+    private static Logger logger = Logger.getLogger("com.rdstew");
 
     @GetMapping("/api/spotify-login")
     public RedirectView spotifyRedirectView( RedirectAttributes attributes){
+        this.loadConfig();
 
-
-        Properties spotifyConf = new Properties();
-        String fn = "/home/ryan/Desktop/SpotifyCredentials.conf";
-        try(FileInputStream fis = new FileInputStream(fn)){
-            spotifyConf.load(fis);
-        }
-        catch(IOException ex){
-            throw new InternalServerError();
-        }
-
-        client_id = spotifyConf.getProperty("client.id");
-        client_secret = spotifyConf.getProperty("client.secret");
-        String redirect_uri = Application.backend_domain + "/api/get-spotify-token";
+        client_id = this.config.getProperty("client.id");
+        client_secret = this.config.getProperty("client.secret");
         String response_type = "code";
-        String state_id = this.generateStateId();
+
+        String state_id = new StateIdBuilder()
+            .length(16)
+            .use_letters(true)
+            .use_numbers(true)
+            .buildStateId()
+            .toString();
 
         attributes.addAttribute("client_id", client_id);
         attributes.addAttribute("redirect_uri", redirect_uri);
@@ -47,9 +61,17 @@ public class RequestAuthController {
     }
 
     @GetMapping("/api/get-spotify-token")
-    public RedirectView getUserToken(RedirectAttributes attributes){
-        
-
+    public RedirectView getUserToken(
+        @RequestParam("code") Optional<String> token, 
+        @RequestParam("state") String state_id,
+        @RequestParam("error") Optional<String> error
+    ){
+        if (token.isPresent()){
+            String grant_type = "authorization_code";
+            this.requestAuthToken(grant_type, token.get(), this.redirect_uri);
+        } else {
+            System.out.println(state_id + ' ' + error.get());
+        }
         return new RedirectView(Application.frontend_domain + "/home");
     }
 
@@ -58,19 +80,50 @@ public class RequestAuthController {
         return("Hello");
     }
 
-    private String generateStateId(){
-        
-        int left_limit = 48;
-        int right_limit = 122;
-        int length = 16;
-        Random random = new Random();
-        String state_id = random.ints(left_limit, right_limit + 1)
-            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i>= 97))
-            .limit(length)
-            .collecter(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString();
-        return state_id;
+    @GetMapping("/id")
+    public String getStateId(){
+        return(new StateIdBuilder()
+            .length(16)
+            .use_letters(true)
+            .use_numbers(true)
+            .buildStateId()
+            .toString()
+        );
     }
 
+    private void loadConfig(){
+        this.config = new Properties();
+        String fn = System.getenv("HOME") + "/SpotifyCredentials.conf";
+        try(FileInputStream fis = new FileInputStream(fn)){
+            this.config.load(fis);
+        }
+        catch(IOException ex){
+            System.out.println(ex.getMessage());
+            throw new InternalServerError();
+        }
+    }
 
+    public int requestAuthToken(String grant_type, String token, String redirect_uri){
+        RestTemplate http = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.add("Authorization", this.config.getProperty("client.id") + ":" + this.config.getProperty("client.secret"));
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", grant_type);
+        body.add("code", token);
+        body.add("redirect_url", redirect_uri);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response =
+            http.exchange(
+                Application.spotify_url + "/api/token",
+                HttpMethod.POST,
+                entity,
+                String.class
+            );
+        System.out.println(response.getBody());
+
+        return 0;
+    }   
 }
