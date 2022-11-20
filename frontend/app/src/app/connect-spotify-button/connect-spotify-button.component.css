@@ -1,0 +1,15 @@
+div {
+    background: #1ed760;
+    color: white;
+    width: 33%;
+    min-width: 20rem;
+    margin:auto;
+    text-align: center;
+    height:3rem;
+    line-height:3rem;
+    border-radius: 2rem;
+}
+
+a:hover, a:visited, a:link, a:active{
+    text-decoration: none;
+}

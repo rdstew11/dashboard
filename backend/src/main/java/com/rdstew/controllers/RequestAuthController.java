@@ -38,7 +38,7 @@ public class RequestAuthController {
 
     private static Logger logger = Logger.getLogger("com.rdstew");
 
-    @GetMapping("/api/spotify-login")
+    @GetMapping("/api/spotify/login")
     public RedirectView spotifyRedirectView( RedirectAttributes attributes){
         this.loadConfig();
 
@@ -51,7 +51,7 @@ public class RequestAuthController {
             .use_numbers(true)
             .buildStateId()
             .toString();
-
+        System.out.println(state_id);
         attributes.addAttribute("client_id", this.client_id);
         attributes.addAttribute("redirect_uri", this.redirect_uri);
         attributes.addAttribute("response_type", response_type);
@@ -76,6 +76,7 @@ public class RequestAuthController {
 
     @GetMapping("/hello")
     public String getHello(){
+        System.out.print("/hello pinged");
         return("Hello");
     }
 

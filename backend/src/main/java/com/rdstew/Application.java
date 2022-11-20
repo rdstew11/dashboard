@@ -11,6 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rdstew.engines.CoreEngine;
+
 @RestController
 @SpringBootApplication
 public class Application{
@@ -30,6 +32,7 @@ public class Application{
             System.out.println(e.getCause());
             System.out.println(e.getMessage());
         }
+        CoreEngine eng = CoreEngine.start();
         SpringApplication.run(Application.class, args);
     }
 }
