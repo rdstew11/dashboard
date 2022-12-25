@@ -17,7 +17,6 @@ export class WebGLService {
       alert('Failed to initialize WebGL context.')
       return
     }
-    
     this.setWebGLCanvasDimensions(canvas);
     this.initializeWebGLCanvas();
   }
