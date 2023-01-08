@@ -6,6 +6,7 @@ import { WebGLService } from './services/web-gl.service';
   templateUrl: './scene.component.html',
   styleUrls: ['./scene.component.css']
 })
+
 export class SceneComponent implements OnInit, AfterViewInit {
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;

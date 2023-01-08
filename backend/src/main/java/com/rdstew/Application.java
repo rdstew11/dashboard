@@ -1,6 +1,7 @@
 package com.rdstew;
 
 import java.util.logging.Logger;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -24,7 +25,11 @@ public class Application{
 
     public static void main(String[] args){
         try{
-            Handler log = new FileHandler("/home/rstew/Desktop/Dev/dashboard/backend/src/main/java/com/rdstew/logs/app.log");
+            String base_path = new File("").getAbsolutePath();
+            System.out.println(base_path);
+            String log_path = new File("src\\main\\java\\com\\rdstew\\logs\\app.log").getAbsolutePath();
+            System.out.println(log_path);
+            Handler log = new FileHandler(log_path);
             Logger.getLogger("com.rdstew").addHandler(log);
             Logger.getLogger("com.rdstew").setLevel(Level.FINEST);
         } catch (IOException e) {
@@ -32,7 +37,7 @@ public class Application{
             System.out.println(e.getCause());
             System.out.println(e.getMessage());
         }
-        CoreEngine eng = CoreEngine.start();
+        // CoreEngine eng = CoreEngine.start();
         SpringApplication.run(Application.class, args);
     }
 }

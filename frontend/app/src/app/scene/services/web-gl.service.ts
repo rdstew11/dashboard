@@ -1,15 +1,16 @@
 import { Injectable, ElementRef } from '@angular/core';
-
+import { HttpClient } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
 export class WebGLService {
+  private base_url: String = "https://localhost:8080"
   private _context: RenderingContext;
   private get gl(): WebGLRenderingContext{
     return this._context as WebGLRenderingContext;
   }
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   initializeWebGLContext(canvas: ElementRef<HTMLCanvasElement>){
     this._context = canvas.nativeElement.getContext("webgl") || canvas.nativeElement.getContext("experimental-webgl");
@@ -59,5 +60,12 @@ export class WebGLService {
     }
 
     return shaderProgram;
+  }
+
+
+  retrieveShaderProgram(type: string){
+    const url = this.base_url + "/webgl/shaders?type=" + type
+    var req = this.http.get<string>(url)
+    print(req.body)
   }
 }

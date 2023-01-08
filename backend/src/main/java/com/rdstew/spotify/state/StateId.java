@@ -1,4 +1,4 @@
-package com.rdstew.state;
+package com.rdstew.spotify.state;
 
 import org.apache.commons.lang3.RandomStringUtils;
 

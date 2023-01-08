@@ -15,7 +15,7 @@ public class CoreEngine{
     private void init(){
         db = DatabaseEngine.start();
         db.connect("jdbc:postgresql:webapp", "webapp", "password");
-        //db.upsert("INSERT INTO chunks(c_id, environment, x, y) VALUES (1,'OCEAN',0,0);");
+        db.upsert("INSERT INTO chunks(c_id, environment, x, y) VALUES (1,'OCEAN',0,0);");
         MapModel map = new MapModel();
         CoordinatePoint p1 = new CoordinatePoint(-1,-1);
         CoordinatePoint p2 = new CoordinatePoint(1, 1);

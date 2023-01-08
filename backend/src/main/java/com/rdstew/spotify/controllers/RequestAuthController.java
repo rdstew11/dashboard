@@ -1,17 +1,15 @@
-package com.rdstew.controllers;
+package com.rdstew.spotify.controllers;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 
 import com.rdstew.exceptions.InternalServerError;
+import com.rdstew.spotify.state.StateIdBuilder;
 import com.rdstew.Application;
-import com.rdstew.state.StateIdBuilder;
-
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

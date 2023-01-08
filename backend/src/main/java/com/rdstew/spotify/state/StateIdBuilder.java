@@ -1,4 +1,4 @@
-package com.rdstew.state;
+package com.rdstew.spotify.state;
 
 public class StateIdBuilder {
     private int length;
